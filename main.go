@@ -65,11 +65,6 @@ func main() {
 	if len(ids) == 0 {
 		return
 	}
-    
-    // Limit to first 10 messages
-    if len(ids) > 20 {
-        //ids = ids[:10]
-    }
 
 	seqset := new(imap.SeqSet)
 	seqset.AddNum(ids...)
@@ -83,7 +78,6 @@ func main() {
 		if err := c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, section.FetchItem()}, msgChan); err != nil {
 			log.Fatal(err)
 		}
-		//close(msgChan)
 	}()
 
 	// Parser goroutine
@@ -112,7 +106,7 @@ func main() {
 	go func() {
 		for raw := range rawChan {
 			job := parser.ParseEmail(raw.Subject, raw.Body, raw.Email, raw.Date)
-			log.Printf("🧠 Parsed: %+v\n", job)
+			log.Printf("Parsed job: %+v\n", job)
 			if job.Company == "" && job.Position == "" {
 				// notion.FlagUnparsed(raw.Subject, raw.Body)
 				continue
@@ -141,13 +135,13 @@ func isJobEmail(subject string) bool {
 
 func getSenderEmail(msg *imap.Message) string {
 	if msg == nil || msg.Envelope == nil || len(msg.Envelope.From) == 0 {
-		log.Println("⚠️ No sender info in email")
+		log.Println("No sender info in email")
 		return ""
 	}
 
 	from := msg.Envelope.From[0] // typically the sender
 	email := from.MailboxName + "@" + from.HostName
-	log.Printf("📬 Sender email: %s", email)
+	log.Printf("Sender email: %s", email)
 	return email
 }
 
@@ -184,7 +178,7 @@ func getBodyText(msg *imap.Message) string {
 
 		contentType := p.Header.Get("Content-Type")
 		if contentType == "" {
-			log.Println("⚠️ Missing Content-Type header in email part")
+			log.Println("Missing Content-Type header in email part")
 			continue
 		}
 
@@ -193,8 +187,6 @@ func getBodyText(msg *imap.Message) string {
 			log.Println("Failed to parse media type:", err)
 			continue
 		}
-
-		log.Printf("🔍 Found part with mediaType: %s", mediaType)
 
 		buf := new(bytes.Buffer)
 		_, err = buf.ReadFrom(p.Body)
@@ -205,7 +197,7 @@ func getBodyText(msg *imap.Message) string {
 
 		if strings.HasPrefix(mediaType, "text/plain") {
 			body := buf.String()
-			log.Printf("✅ Extracted plain text body (length: %d)", len(body))
+			log.Printf("Extracted plain text body (length: %d)", len(body))
 			return body
 		}
 
@@ -215,11 +207,11 @@ func getBodyText(msg *imap.Message) string {
 	}
 
 	if htmlBody != "" {
-		log.Println("⚠️ No text/plain found, using HTML fallback")
+		log.Println("No text/plain found, using HTML fallback")
 		return stripHTMLTags(htmlBody)
 	}
 
-	log.Println("❌ No text/plain or usable html body found")
+	log.Println("No text/plain or usable html body found")
 	return ""
 }
 

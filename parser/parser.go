@@ -27,11 +27,11 @@ func Init(apiKey string) {
 }
 
 type LLMResponse struct {
-	Company   string `json:"company"`
-	Position  string `json:"position"`
-	Stage     string `json:"stage"` // Applied, Interview, Rejected
-	Referral  bool   `json:"referral"`
-	JobURL    string `json:"job_url,omitempty"`
+	Company  string `json:"company"`
+	Position string `json:"position"`
+	Stage    string `json:"stage"` // Applied, Interview, Rejected
+	Referral bool   `json:"referral"`
+	JobURL   string `json:"job_url,omitempty"`
 }
 
 func ParseEmail(subject, body, email string, emailDate time.Time) *models.Job {
@@ -40,7 +40,6 @@ func ParseEmail(subject, body, email string, emailDate time.Time) *models.Job {
 	if err != nil {
 		log.Printf("LLM parse failed: %v", err)
 		llmResult = fallbackParse(subject, body)
-		//return &job
 	}
 
 	job := models.Job{
@@ -85,11 +84,10 @@ func loadPromptTemplate(subject, body, email string) (string, error) {
 	return buf.String(), nil
 }
 
-
 func parseWithLLM(subject, body, email string) (*LLMResponse, error) {
 	ctx := context.Background()
 
-	prompt, err := loadPromptTemplate(subject,body,email)
+	prompt, err := loadPromptTemplate(subject, body, email)
 	if err != nil {
 		return nil, fmt.Errorf("prompt load failed: %w",err)
 	}
@@ -112,10 +110,6 @@ func parseWithLLM(subject, body, email string) (*LLMResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("Email SUBJECT:\n%s\n",subject)
-	log.Printf("Email BODY:\n%s\n",body)
-	log.Printf("LLM raw response:\n%s\n", resp.Choices[0].Message.Content)
 
 	var llm LLMResponse
 
@@ -142,7 +136,6 @@ func parseWithLLM(subject, body, email string) (*LLMResponse, error) {
 		log.Printf("JSON unmarshal failed: %v", err)
 		return nil, fmt.Errorf("decode error: %w", err)
 	}
-
 
 	return &llm, nil
 }
@@ -197,7 +190,6 @@ func fallbackParse(subject, body string) *LLMResponse {
 			llm.Company = strings.TrimSpace(match[1])
 		}
 	}
-	//llm.Company = "Fallback"
 
 	return &llm
 }

@@ -20,7 +20,6 @@ const (
 	ColPosition     = "Position"
 )
 
-
 var (
 	notionToken string
 	databaseID  string
@@ -68,8 +67,8 @@ func getText(page *notionapi.Page, field string) string {
 func UpdateOrCreate(job *models.Job) {
 	page, err := findMatchingPage(job)
 	if err != nil {
-		log.Println("⛳ Using DB ID:", databaseID)
-		log.Println("❌ Notion lookup error:", err)
+		log.Println("Using DB ID:", databaseID)
+		log.Println("Notion lookup error:", err)
 		Unparseable = append(Unparseable, *job)
 		return
 	}
@@ -101,25 +100,24 @@ func UpdateOrCreate(job *models.Job) {
 		props[ColResponseDate] = &notionapi.DateProperty{
 			Date: &notionapi.DateObject{
 				Start: toNotionDatePtr(*job.ResponseDate),
-				//Start: notionapi.Date(job.ResponseDate.Format(time.RFC3339)),
 			},
 		}
 	}
 
 	if page != nil {
-		log.Println("✏️ Updating existing entry:", job.Company, job.Position)
+		log.Println("Updating existing entry:", job.Company, job.Position)
 		_, err := client.Page.Update(context.Background(), notionapi.PageID(page.ID), &notionapi.PageUpdateRequest{
 			Properties: props,
 		})
 		if err != nil {
-			log.Println("❌ Update failed:", err)
+			log.Println("Update failed:", err)
 			Unparseable = append(Unparseable, *job)
 		}
 		return
 	}
 
 	// Create new entry
-	log.Println("➕ Creating new entry:", job.Company, job.Position)
+	log.Println("Creating new entry:", job.Company, job.Position)
 	props[ColCompany] = &notionapi.TitleProperty{
 		Title: []notionapi.RichText{{
 			Text: &notionapi.Text{Content: job.Company},
@@ -136,7 +134,7 @@ func UpdateOrCreate(job *models.Job) {
 		Properties: props,
 	})
 	if err != nil {
-		log.Println("❌ Create failed:", err)
+		log.Println("Create failed:", err)
 		Unparseable = append(Unparseable, *job)
 	}
 }
@@ -157,7 +155,7 @@ func mapStageToNotionStatus(stage string) notionapi.Option {
 	case "Rejected":
 		return notionapi.Option{Name: "Rejected"}
 	default:
-		log.Printf("⚠️ Unknown stage '%s', defaulting to 'Applied'", stage)
+		log.Printf("Unknown stage '%s', defaulting to 'Applied'", stage)
 		return notionapi.Option{Name: "Applied"}
 	}
 }
