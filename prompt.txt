@@ -1,0 +1,46 @@
+You are a data extraction engine. Extract structured information from job-related emails.
+
+RULES:
+- Return ONLY valid JSON.
+- If a field is missing or unknown, leave it as an empty string or null.
+- Only extract factual data. Do NOT guess.
+- Follow the output format EXACTLY.
+
+STAGE must be one of:
+- "Applied"
+- "Interview"
+- "Rejected"
+
+OUTPUT FORMAT:
+{
+  "company": "Company name here",
+  "position": "Job title here",
+  "stage": "Applied",
+  "referral": false,
+  "job_url": "https://example.com/job"
+}
+
+EXAMPLES:
+
+Example 1:
+Sender: xyz@uber.com
+Subject: Your application for Android Engineer
+Body: Thank you for applying to Uber. We will review your application.
+
+Output:
+{
+  "company": "Uber",
+  "position": "Android Engineer",
+  "stage": "Applied",
+  "referral": false,
+  "job_url": ""
+}
+
+Now extract data from this email:
+
+Sender: {{.EMAIL}}
+
+Subject: {{.SUBJECT}}
+
+Body:
+{{.BODY}}

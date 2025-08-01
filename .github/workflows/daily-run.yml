@@ -1,0 +1,27 @@
+name: Daily Job Tracker
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # 12 AM EST (4 AM UTC)
+  workflow_dispatch:     # allows manual trigger
+
+jobs:
+  run-job-parser:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Run Go script
+        run: go run main.go
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
