@@ -30,7 +30,7 @@ type RawEmail struct {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("⚠️ .env file not found. Assuming environment variables are already set.")
 	}
 	email := os.Getenv("GMAIL_USER")
 	password := os.Getenv("GMAIL_APP_PASSWORD")
