@@ -91,12 +91,7 @@ Use this in your `.env` file or GitHub Secrets:
 ```env
 USE_GEMINI=true      # to use Gemini  
 USE_GEMINI=false     # to use GPT (default)### 🔹 How do I switch between GPT and Gemini?
-
-Use this in your `.env` file or GitHub Secrets:
-
-```env
-USE_GEMINI=true      # to use Gemini  
-USE_GEMINI=false     # to use GPT (default)
+```
 
 ---
 
