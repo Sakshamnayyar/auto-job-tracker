@@ -26,3 +26,9 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Upload unparsed job emails
+        uses: actions/upload-artifact@v3
+        with:
+          name: unparsed_emails
+          path: unparsed/unparsed_emails.csv

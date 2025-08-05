@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"fmt"
 	"strings"
 	"time"
 	"bytes"
@@ -27,6 +28,7 @@ type RawEmail struct {
 	Date    time.Time
 }
 
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -36,9 +38,12 @@ func main() {
 	password := os.Getenv("GMAIL_APP_PASSWORD")
 	notionToken := os.Getenv("NOTION_TOKEN")
 	notionDB := os.Getenv("NOTION_DB_ID")
-    openaiKey := os.Getenv("OPENAI_API_KEY")
-    parser.Init(openaiKey)  
+    //parser.Init(openaiKey)  
+	parser.InitLLM()
 	notion.Init(notionToken, notionDB)
+	
+	var failedJobs []models.FailedJob
+
 
 	c, err := client.DialTLS("imap.gmail.com:993", nil)
 	if err != nil {
@@ -108,7 +113,13 @@ func main() {
 			job := parser.ParseEmail(raw.Subject, raw.Body, raw.Email, raw.Date)
 			log.Printf("Parsed job: %+v\n", job)
 			if job.Company == "" && job.Position == "" {
-				// notion.FlagUnparsed(raw.Subject, raw.Body)
+				failedJobs = append(failedJobs, models.FailedJob{
+					Subject: raw.Subject,
+					Body:    raw.Body,
+					Email:   raw.Email,
+					Date:    raw.Date,
+					Reason:  "Empty LLM output",
+				})
 				continue
 			}
 			jobChan <- job
@@ -120,6 +131,9 @@ func main() {
 	for job := range jobChan {
 		notion.UpdateOrCreate(job)
 	}
+	
+	writeFailuresToCSV(failedJobs, models.FailedJobs)
+
 }
 
 func isJobEmail(subject string) bool {
@@ -222,3 +236,40 @@ func stripHTMLTags(html string) string {
 	text = strings.ReplaceAll(text, "&nbsp;", " ")
 	return strings.TrimSpace(text)
 }
+
+func writeFailuresToCSV(llmFailures []models.FailedJob, notionFailures []models.FailedJob) {
+	all := append(llmFailures, notionFailures...)
+
+	if len(all) == 0 {
+		log.Println("✅ All job emails parsed + written successfully.")
+		return
+	}
+	
+	os.MkdirAll("unparsed", 0755)
+	f, err := os.Create("unparsed/unparsed_emails.csv")
+	if err != nil {
+		log.Printf("❌ Failed to create unparsed_emails.csv: %v", err)
+		return
+	}
+	defer f.Close()
+
+	f.WriteString("Date,Email,Subject,Body,Reason\n")
+
+	for _, e := range all {
+		safeBody := strings.ReplaceAll(e.Body, "\"", "'")
+		safeBody = strings.ReplaceAll(safeBody, "\n", " ")
+		safeSubject := strings.ReplaceAll(e.Subject, "\"", "'")
+
+		line := fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+			e.Date.Format("2006-01-02 15:04"),
+			e.Email,
+			safeSubject,
+			safeBody,
+			e.Reason,
+		)
+		f.WriteString(line)
+	}
+
+	log.Printf("📄 Wrote %d failed jobs to unparsed_emails.csv", len(all))
+}
+
