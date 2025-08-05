@@ -55,6 +55,21 @@ Or trigger it manually from the **Actions** tab.
 
 ---
 
+### ⚠️ Important: Make Your Repo Private (Highly Recommended)
+
+By default, forks are **public**. This means:
+
+- Your GitHub Actions logs can expose sensitive metadata  
+- If not handled properly, files like `unparsed_emails.csv` could leak job info
+
+To keep your data safe:
+
+> 🔒 **Go to your repo → Settings → Change visibility → Make private**
+
+This ensures your job applications, emails, and logs stay confidential.
+
+---
+
 ## 💻 Option 2: Run Locally
 
 ### ✅ 1. Clone the repo
@@ -128,13 +143,9 @@ This automates your grind so you can focus on prepping, not updating spreadsheet
 
 ---
 
-## 🛡️ Fail-Safe: CSV Logging of Failed Emails
+## 🛡️ CSV Logging of Failed Emails
 
 Any job-related email that fails parsing or cannot be added to Notion is automatically saved in a CSV file (`unparsed_emails.csv`) for review.
-
-- 📄 This file is **uploaded as a private GitHub Actions artifact**, not stored in the repo  
-- ✅ Only you (the workflow runner) can download and review it  
-- 🔐 Keeps your data secure and out of version control
 
 ---
 
