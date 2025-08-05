@@ -1,6 +1,6 @@
 # Auto Job Tracker 📩 → 📊
 
-A fully automated system to **parse job application emails** from Gmail and **update your Notion job tracker** — using GPT and Go.
+A fully automated system to **parse job application emails** from Gmail and **update your Notion job tracker** — using GPT or Gemini and Go.  
 Runs daily via GitHub Actions, or manually from your terminal.
 
 ---
@@ -9,7 +9,7 @@ Runs daily via GitHub Actions, or manually from your terminal.
 
 * Connects to your Gmail inbox via IMAP
 * Reads recent job-related emails
-* Uses OpenAI (GPT-4o) to extract:
+* Uses OpenAI **(GPT-4o)** or **Gemini Pro** to extract:
 
   * Company
   * Position
@@ -17,7 +17,7 @@ Runs daily via GitHub Actions, or manually from your terminal.
   * Referral status
   * Job URL
 * Pushes structured results to your Notion database
-* Logs unparseable emails for review
+* Logs unparseable emails privately for manual review
 
 ---
 
@@ -35,19 +35,23 @@ You can either **fork + run via GitHub Actions**, or **run locally via CLI**.
 
 Go to your repo → **Settings → Secrets → Actions** → Add the following:
 
-| Name                 | Value                                  |
-| -------------------- | -------------------------------------- |
-| `GMAIL_USER`         | Your Gmail address                     |
-| `GMAIL_APP_PASSWORD` | Gmail App Password (not your password) |
-| `NOTION_TOKEN`       | Integration token from Notion          |
-| `NOTION_DB_ID`       | Your Notion database ID                |
-| `OPENAI_API_KEY`     | Your OpenAI API key (`sk-...`)         |
+| Name                 | Value                                   |
+| -------------------- | --------------------------------------- |
+| `GMAIL_USER`         | Your Gmail address                      |
+| `GMAIL_APP_PASSWORD` | Gmail App Password (not your password)  |
+| `NOTION_TOKEN`       | Integration token from Notion           |
+| `NOTION_DB_ID`       | Your Notion database ID                 |
+| `OPENAI_API_KEY`     | Your OpenAI API key (`sk-...`)          |
+| `GEMINI_API_KEY`     | Your Gemini API Key *(optional)*        |
+| `USE_GEMINI`         | `true` to use Gemini, `false` for GPT   |
+
+> 🧠 Gemini is free to use — no billing required. Just add `GEMINI_API_KEY` and set `USE_GEMINI=true` to switch.
 
 > ✅ Your Gmail must have IMAP enabled, and you must use an App Password.
 
-### ✅ 3. That's it — it runs daily at 12 AM EST
+### ✅ 3. Done — runs daily at 12 AM EST
 
-You can also trigger it manually from the **Actions** tab.
+Or trigger it manually from the **Actions** tab.
 
 ---
 
@@ -68,6 +72,8 @@ GMAIL_APP_PASSWORD=your_app_password
 NOTION_TOKEN=your_notion_secret
 NOTION_DB_ID=your_notion_database_id
 OPENAI_API_KEY=your_openai_key
+GEMINI_API_KEY=your_gemini_key
+USE_GEMINI=true
 ```
 
 ### ✅ 3. Run it
@@ -75,6 +81,22 @@ OPENAI_API_KEY=your_openai_key
 ```bash
 go run main.go
 ```
+
+---
+
+### 🔹 How do I switch between GPT and Gemini?
+
+Use this in your `.env` file or GitHub Secrets:
+
+```env
+USE_GEMINI=true      # to use Gemini  
+USE_GEMINI=false     # to use GPT (default)### 🔹 How do I switch between GPT and Gemini?
+
+Use this in your `.env` file or GitHub Secrets:
+
+```env
+USE_GEMINI=true      # to use Gemini  
+USE_GEMINI=false     # to use GPT (default)
 
 ---
 
@@ -108,6 +130,16 @@ Your Notion database must have these columns:
 
 Tired of tracking job apps manually?
 This automates your grind so you can focus on prepping, not updating spreadsheets.
+
+---
+
+## 🛡️ Fail-Safe: CSV Logging of Failed Emails
+
+Any job-related email that fails parsing or cannot be added to Notion is automatically saved in a CSV file (`unparsed_emails.csv`) for review.
+
+- 📄 This file is **uploaded as a private GitHub Actions artifact**, not stored in the repo  
+- ✅ Only you (the workflow runner) can download and review it  
+- 🔐 Keeps your data secure and out of version control
 
 ---
 
