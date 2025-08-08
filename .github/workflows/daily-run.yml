@@ -1,8 +1,8 @@
 name: Daily Job Tracker
 
 on:
-  schedule:
-    - cron: '0 4 * * *'  # 12 AM EST (4 AM UTC)
+  #schedule:
+    # - cron: '0 4 * * *'  # 12 AM EST (4 AM UTC)
   workflow_dispatch:     # allows manual trigger
 
 jobs:
