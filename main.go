@@ -61,7 +61,7 @@ func main() {
 	}
 
 	criteria := imap.NewSearchCriteria()
-	criteria.Since = time.Now().AddDate(0, 0, -15)
+	criteria.Since = time.Now().AddDate(0, 0, -30)
 	ids, err := c.Search(criteria)
 	if err != nil {
 		log.Fatal(err)
